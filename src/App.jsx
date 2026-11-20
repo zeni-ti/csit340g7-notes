@@ -7,12 +7,12 @@ function App() {
   const [largeText, setLargeText] = useState(false)
 
   return (
-    <SettingsContext value={{ largeText, setLargeText }}>
+    <SettingsContext.Provider value={{ largeText, setLargeText }}>
       <div className="bg-[#f5f5f5] font-light text-[#111]">
         <Notes />
         <Info name="HANZEN D. LINES" />
       </div>
-    </SettingsContext>
+    </SettingsContext.Provider>
   )
 }
 
