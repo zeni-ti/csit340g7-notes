@@ -23,8 +23,16 @@ function Notes() {
 const [form, setForm] = useState({ title: '', body: '' })
 
 useEffect(() => {
-    localStorage.setItem('notes', JSON.stringify(notes))
-  }, [notes])
+  localStorage.setItem('notes', JSON.stringify(notes))
+}, [notes])
+
+useEffect(() => {
+  const timer = setTimeout(() => {
+    localStorage.setItem('draft', JSON.stringify(form))
+  }, 1000)
+
+  return () => clearTimeout(timer)
+}, [form])
 
 function handleChange(e) {
   const { name, value } = e.target
