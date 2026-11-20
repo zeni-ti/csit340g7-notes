@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import NoteCard from './NoteCard.jsx'
 
 const startingNotes = [
@@ -19,49 +19,47 @@ function Notes() {
     const saved = localStorage.getItem('notes')
     return saved ? JSON.parse(saved) : startingNotes
   })
+  const [form, setForm] = useState({ title: '', body: '' })
+  const [search, setSearch] = useState('')
+  const titleRef = useRef(null)
 
-const [form, setForm] = useState({ title: '', body: '' })
-const titleRef = useRef(null) // added
+  useEffect(() => {
+    localStorage.setItem('notes', JSON.stringify(notes))
+  }, [notes])
 
-useEffect(() => {
-  localStorage.setItem('notes', JSON.stringify(notes))
-}, [notes])
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      localStorage.setItem('draft', JSON.stringify(form))
+    }, 1000)
 
-useEffect(() => {
-  const timer = setTimeout(() => {
-    localStorage.setItem('draft', JSON.stringify(form))
-  }, 1000)
+    return () => clearTimeout(timer)
+  }, [form])
 
-  return () => clearTimeout(timer)
-}, [form])
+  function handleChange(e) {
+    const { name, value } = e.target
+    setForm({ ...form, [name]: value })
+  }
 
-function handleChange(e) {
-  const { name, value } = e.target
-  setForm({ ...form, [name]: value })
-}
+  function handleSubmit(e) {
+    e.preventDefault()
+    const title = form.title.trim()
+    const body = form.body.trim()
+    if (!title || !body) return
 
-function handleSubmit(e) {
-  e.preventDefault()
-  const title = form.title.trim()
-  const body = form.body.trim()
-  if (!title || !body) return
+    setNotes([...notes, { id: Date.now(), title, body }])
+    setForm({ title: '', body: '' })
+    titleRef.current.focus()
+  }
 
-  setNotes([...notes, { id: Date.now(), title, body }])
-  setForm({ title: '', body: '' })
-  titleRef.current.focus() // added
-}
+  const handleDelete = useCallback((id) => {
+    setNotes(notes.filter((note) => note.id !== id))
+  }, [notes])
 
-function handleDelete(id) {
-  setNotes(notes.filter((note) => note.id !== id))
-}
-
-const [search, setSearch] = useState('')
-
-const visibleNotes = useMemo(() => {
-  return notes.filter((note) =>
-    note.title.toLowerCase().includes(search.toLowerCase())
-  )
-}, [notes, search])
+  const visibleNotes = useMemo(() => {
+    return notes.filter((note) =>
+      note.title.toLowerCase().includes(search.toLowerCase())
+    )
+  }, [notes, search])
 
   return (
     <div className="grid min-h-screen grid-cols-[420px_1fr]">
@@ -83,19 +81,19 @@ const visibleNotes = useMemo(() => {
         <form className="grid gap-3" onSubmit={handleSubmit}>
           <p className="text-[13px] font-normal tracking-wide text-[#949494]">NEW NOTE</p>
           <input
-            ref={titleRef} // added
+            ref={titleRef}
             name="title"
             placeholder="Title"
             className="h-[52px] w-full border border-[#e6e6e6] px-4 text-lg outline-none placeholder:text-black/40 placeholder:italic focus:border-[#cf7d7d]"
-                value={form.title}
-                onChange={handleChange}
+            value={form.title}
+            onChange={handleChange}
           />
           <textarea
             name="body"
             placeholder="Write your note"
             className="h-[120px] w-full resize-none py-3 border border-[#e6e6e6] px-4 text-lg outline-none placeholder:text-black/40 placeholder:italic focus:border-[#cf7d7d]"
-                value={form.body}
-                onChange={handleChange}
+            value={form.body}
+            onChange={handleChange}
           />
           <button
             type="submit"
@@ -110,26 +108,24 @@ const visibleNotes = useMemo(() => {
         <h2 className="mb-6 text-3xl">All notes</h2>
 
         <ul className="grid grid-cols-3 items-start gap-5">
-         {visibleNotes.map((note) => (
-        <li
-            key={note.id}
-        className="relative min-h-32 bg-white px-6 py-5 shadow-[0_2px_4px_0_rgba(0,0,0,0.2),0_25px_50px_0_rgba(0,0,0,0.1)]"
-        >
-        <NoteCard title={note.title} body={note.body} />
-        <button
-            type="button"
-            aria-label="Delete note"
-            className="absolute top-4 right-5 cursor-pointer text-[26px] leading-none text-[#949494] hover:text-[#c18585]"
-            onClick={() => handleDelete(note.id)}
-        >
-            ×
-        </button>
-        </li>
-    ))}
-    </ul>
+          {visibleNotes.map((note) => (
+            <li
+              key={note.id}
+              className="relative min-h-32 bg-white px-6 py-5 shadow-[0_2px_4px_0_rgba(0,0,0,0.2),0_25px_50px_0_rgba(0,0,0,0.1)]"
+            >
+              <NoteCard
+                id={note.id}
+                title={note.title}
+                body={note.body}
+                onDelete={handleDelete}
+              />
+            </li>
+          ))}
+        </ul>
+
         {visibleNotes.length === 0 && (
-    <p className="text-lg text-[#949494]">No notes found</p>
-    )}
+          <p className="text-lg text-[#949494]">No notes found</p>
+        )}
       </section>
     </div>
   )
