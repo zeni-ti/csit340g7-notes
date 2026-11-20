@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
 import NoteCard from './NoteCard.jsx'
 
-function Notes() {
-    const [notes, setNotes] = useState([
+const startingNotes = [
   {
     id: 1,
     title: 'Review map and filter',
@@ -13,8 +12,14 @@ function Notes() {
     title: 'Prepare for the quiz',
     body: 'Practice writing one handler for many inputs.',
   },
-])
+]
 
+function Notes() {
+  const [notes, setNotes] = useState(() => {
+    const saved = localStorage.getItem('notes')
+    return saved ? JSON.parse(saved) : startingNotes
+  })
+  
 const [form, setForm] = useState({ title: '', body: '' })
 
 useEffect(() => {
