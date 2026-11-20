@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react' // changed: added useRef
 import NoteCard from './NoteCard.jsx'
 
 const startingNotes = [
@@ -19,8 +19,9 @@ function Notes() {
     const saved = localStorage.getItem('notes')
     return saved ? JSON.parse(saved) : startingNotes
   })
-  
+
 const [form, setForm] = useState({ title: '', body: '' })
+const titleRef = useRef(null) // added
 
 useEffect(() => {
   localStorage.setItem('notes', JSON.stringify(notes))
@@ -47,6 +48,7 @@ function handleSubmit(e) {
 
   setNotes([...notes, { id: Date.now(), title, body }])
   setForm({ title: '', body: '' })
+  titleRef.current.focus() // added
 }
 
 function handleDelete(id) {
@@ -80,18 +82,19 @@ const visibleNotes = notes.filter((note) =>
         <form className="grid gap-3" onSubmit={handleSubmit}>
           <p className="text-[13px] font-normal tracking-wide text-[#949494]">NEW NOTE</p>
           <input
+            ref={titleRef} // added
             name="title"
             placeholder="Title"
             className="h-[52px] w-full border border-[#e6e6e6] px-4 text-lg outline-none placeholder:text-black/40 placeholder:italic focus:border-[#cf7d7d]"
                 value={form.title}
-                onChange={handleChange}          
+                onChange={handleChange}
           />
           <textarea
             name="body"
             placeholder="Write your note"
             className="h-[120px] w-full resize-none py-3 border border-[#e6e6e6] px-4 text-lg outline-none placeholder:text-black/40 placeholder:italic focus:border-[#cf7d7d]"
                 value={form.body}
-                onChange={handleChange}  
+                onChange={handleChange}
           />
           <button
             type="submit"
