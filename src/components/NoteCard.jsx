@@ -1,13 +1,25 @@
-import { useState } from 'react'
+import { useState, useContext } from 'react'
+import { SettingsContext } from '../SettingsContext.js'
 
 function NoteCard({ title, body }) {
   const [isOpen, setIsOpen] = useState(false)
+  const { largeText } = useContext(SettingsContext)
 
   return (
     <div>
-      <h3 className="pr-8 text-[22px] font-normal break-words">{title}</h3>
+      <h3
+        className={`pr-8 font-normal break-words ${
+          largeText ? 'text-[28px]' : 'text-[22px]'
+        }`}
+      >
+        {title}
+      </h3>
       {isOpen && (
-        <p className="mt-3 text-[17px] break-words whitespace-pre-wrap text-[#4d4d4d]">
+        <p
+          className={`mt-3 break-words whitespace-pre-wrap text-[#4d4d4d] ${
+            largeText ? 'text-[21px]' : 'text-[17px]'
+          }`}
+        >
           {body}
         </p>
       )}
